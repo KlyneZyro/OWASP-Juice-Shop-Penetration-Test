@@ -1,50 +1,32 @@
-# OWASP Juice Shop Security Assessment 
+# VAPT Report: OWASP Juice Shop Web Application Assessment
 
-**Target:** OWASP Juice Shop (Docker Container)  
-**Type:** Web Application Security Assessment (Black Box)  
-**Date:** January 2026  
-**Analyst:** Klyne Zyro C. Reyes
+##  Project Overview
+This repository contains a comprehensive Vulnerability Assessment and Penetration Testing (VAPT) report for **OWASP Juice Shop**, a modern web application designed with intentional security flaws. The assessment follows a black-box methodology, demonstrating a complete attack lifecycle—from initial reconnaissance and logic abuse to administrative account takeover and supply chain analysis.
 
-##  [Download the Full Report (PDF)](./OWASP%20Juice%20Shop%20Web%20Application%20Security%20Assessment.pdf)
-
----
+##  Target Profile
+- **Target Application:** OWASP Juice Shop (Node.js / Express / SQLite)
+- **Primary Attack Vectors:** SQL Injection (SQLi), Cross-Site Scripting (XSS), IDOR
+- **Risk Severity:** CRITICAL (Multiple High/Critical findings)
 
 ##  Executive Summary
-This project involves a comprehensive security assessment of the OWASP Juice Shop application. The goal was to identify and exploit vulnerabilities mapped to the **OWASP Top 10** framework. The assessment simulates a real-world engagement, moving from reconnaissance to active exploitation and privilege escalation.
+Successfully compromised the application's administrative tier by exploiting a **Union-Based SQL Injection** in the login portal. Following the initial compromise, I performed a full database dump to exfiltrate user credentials and bypassed access controls to manipulate customer orders. The assessment also uncovered a **Supply Chain Vulnerability** via a "Poison Null Byte" attack, allowing the exfiltration of the backend `package.json` file to identify outdated and vulnerable dependencies.
 
-###  Tools Used
-* **Burp Suite Community:** Traffic interception and manipulation.
-* **Firefox Developer Tools:** DOM analysis and JavaScript debugging.
-* **Manual Exploitation:** SQL Injection, XSS payloads, and logic abuse.
+##  Key Skills & Tools Demonstrated
+- **Reconnaissance:** Endpoint enumeration and traffic analysis using `Burp Suite Community` and `Firefox Developer Tools`.
+- **Exploitation:** Manual execution of SQL Injection (`UNION SELECT`) and Reflected XSS payloads to bypass frontend restrictions.
+- **Post-Exploitation:** Schema extraction and mass credential harvesting (User/Password Hash dump).
+- **Supply Chain Analysis:** identified specific version vulnerabilities in backend libraries (`sanitize-html`, `sqlite3`) by retrieving the server's dependency manifest.
+- **Logic Abuse:** Exploited Insecure Direct Object References (IDOR) to manipulate shopping baskets and forge customer reviews.
+- **Reporting:** Authored a professional remediation report focusing on Input Validation, RBAC enforcement, and Secrets Management.
 
----
+##  Documentation
+- **[Full Technical Report (PDF)](./OWASP%20Juice%20Shop%20Web%20Application%20Security%20Assessment.pdf)** - Detailed step-by-step walk-through, screenshots, and remediation roadmap.
 
-##  Key Findings
-
-### 1. SQL Injection & Account Takeover (Critical)
-* **Vulnerability:** The login portal failed to sanitize input, allowing for a classic SQL Injection (`' OR 1=1 --`).
-* **Impact:** Bypassed authentication to gain **Administrative Access** without valid credentials.
-* **Data Exfiltration:** Exploited a UNION-based SQL injection to dump the entire `Users` table and database schema.
-
-### 2. Sensitive Data Exposure via "Soft Deletion"
-* **Vulnerability:** The application marked products as "deleted" in the database but did not remove them.
-* **Impact:** Used SQL injection to recover "unsafe" products (Rippertuer Special Juice) that were supposedly removed from the platform.
-
-### 3. Supply Chain Intelligence (OSINT)
-* **Vulnerability:** Uncovered a `package.json.bak` file via a "Poison Null Byte" directory traversal attack.
-* **Impact:** Revealed exact version numbers of backend libraries (e.g., `sanitize-html` v1.4.2), enabling precise mapping of unpatched CVEs in the software supply chain.
-
-### 4. Broken Access Control (IDOR)
-* **Vulnerability:** Insecure Direct Object References in the Basket functionality.
-* **Impact:** Allowed unauthorized viewing and manipulation of other users' shopping carts by simply changing the `bid` (Basket ID) parameter.
+##  Lessons Learned
+- **Input Validation is Non-Negotiable:** A single unvalidated input field on the login page compromised the entire administrative tier, reinforcing the need for global sanitization.
+- **"Soft Deletion" Risks:** Marking database rows as "deleted" without physical removal allows attackers to recover sensitive data via SQL Injection.
+- **Obscurity != Security:** Attempts to hide paths using Base64/ROT13 encoding or "hidden" directories (like `/ftp`) were trivially bypassed during the recon phase.
+- **Strategic Pivot:** While web exploitation is effective, analyzing the backend architecture (the "Supply Chain" finding) provided the most critical insight into the system's long-term security posture.
 
 ---
-
-##  Professional Reflection
-While this assessment focused on web-specific vectors (XSS, SQLi), the findings reinforced my interest in **Infrastructure and Network Security**. Discovering the server-side dependency leaks and understanding the backend architecture were the highlights of this engagement. 
-
-My future projects will focus on **Post-Exploitation** and pivoting from compromised web servers into internal Active Directory environments.
-
----
-
-* **Disclaimer:** This assessment was performed on a locally hosted, intentionally vulnerable application (OWASP Juice Shop) for educational purposes. No live systems were targeted.*
+*Disclaimer: This project was conducted in a locally hosted, authorized lab environment for educational purposes. Unauthorized hacking is illegal and unethical.*
